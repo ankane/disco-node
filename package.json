@@ -1,0 +1,31 @@
+{
+  "name": "disco-rec",
+  "version": "0.1.0",
+  "description": "Recommendations for Node.js using collaborative filtering",
+  "homepage": "https://github.com/ankane/disco-node",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "authors": [
+    "ankane"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ankane/disco-node"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">= 18"
+  },
+  "dependencies": {
+    "libmf": "^0.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.6.4"
+  },
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+  }
+}
