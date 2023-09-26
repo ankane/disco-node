@@ -171,10 +171,6 @@ test('predict new item', async () => {
   expect(recommender.predict([{userId: 1, itemId: 'New movie'}])).toStrictEqual([recommender.globalMean()]);
 });
 
-test('predict user recs consistent', () => {
-
-});
-
 test('no training data', () => {
   const recommender = new Recommender();
   expect(() => recommender.fit([])).toThrow('No training data');
