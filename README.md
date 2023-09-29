@@ -137,8 +137,8 @@ recommender.userRecs(newUserId); // returns empty array
 
 There are a number of ways to deal with this, but here are some common ones:
 
-- For user-based recommendations, show new users the most popular items.
-- For item-based recommendations, make content-based recommendations.
+- For user-based recommendations, show new users the most popular items
+- For item-based recommendations, make content-based recommendations
 
 ## Reference
 
