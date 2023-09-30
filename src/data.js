@@ -19,8 +19,7 @@ export async function loadMovieLens() {
   const movies = {};
   for (let line of readLines(itemPath)) {
     const row = line.split('|');
-    // TODO convert to utf-8
-    movies[row[0]] = row[1];
+    movies[row[0]] = convertToUtf8(row[1]);
   }
 
   const data = [];
@@ -82,7 +81,24 @@ async function get(url) {
 }
 
 function readLines(path) {
-  const lines = fs.readFileSync(path).toString().split('\n');
+  const lines = fs.readFileSync(path).toString('binary').split('\n');
   lines.pop();
   return lines;
+}
+
+function convertToUtf8(str) {
+  const b = [];
+  // iterate over bytes
+  const s = Buffer.from(str, 'binary');
+  for (let i = 0; i < s.length; i++) {
+    const v = s[i];
+    // ISO-8859-1 to UTF-8
+    // first 128 are same
+    if (v < 128) {
+      b.push(v);
+    } else {
+      b.push(195, v - 64);
+    }
+  }
+  return Buffer.from(b).toString('utf8');
 }
