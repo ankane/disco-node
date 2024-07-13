@@ -21,7 +21,7 @@
     "node": ">= 18"
   },
   "dependencies": {
-    "libmf": "^0.1.0"
+    "libmf": "^0.2.0"
   },
   "scripts": {
     "test": "node --test"
