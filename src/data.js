@@ -1,7 +1,7 @@
-import { createHash } from 'crypto';
-import fs from 'fs';
-import https from 'https';
-import path from 'path';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import https from 'node:https';
+import path from 'node:path';
 
 export async function loadMovieLens() {
   const itemPath = await downloadFile(
