@@ -1,10 +1,31 @@
 name: build
 on: [push, pull_request]
 jobs:
-  build:
+  node:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 20, 18]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
       - run: npm install
       - run: npm test
+  bun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - run: bun run test
+  deno:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - run: deno task test
