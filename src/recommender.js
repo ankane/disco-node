@@ -112,8 +112,8 @@ export default class Recommender {
     this.#userFactors = model.p();
     this.#itemFactors = model.q();
 
-    this.normalizedUserFactors = null;
-    this.normalizedItemFactors = null;
+    this.userNorms = null;
+    this.itemNorms = null;
   }
 
   // generates a prediction even if a user has already rated the item
@@ -186,12 +186,12 @@ export default class Recommender {
 
   itemRecs(itemId, count = 5) {
     this.#checkFit();
-    return this.#similar(itemId, 'itemId', this.itemMap, this.#normalizedItemFactors(), count);
+    return this.#similar(itemId, 'itemId', this.itemMap, this.#itemFactors, this.#itemNorms(), count);
   }
 
   similarUsers(userId, count = 5) {
     this.#checkFit();
-    return this.#similar(userId, 'userId', this.userMap, this.#normalizedUserFactors(), count);
+    return this.#similar(userId, 'userId', this.userMap, this.#userFactors, this.#userNorms(), count);
   }
 
   userIds() {
@@ -216,34 +216,29 @@ export default class Recommender {
     return this.#globalMean;
   }
 
-  #normalizedUserFactors() {
-    this.normalizedUserFactors ??= this.#normalize(this.#userFactors);
-    return this.normalizedUserFactors;
+  #userNorms() {
+    this.userNorms ??= this.#norms(this.#userFactors);
+    return this.userNorms;
   }
 
-  #normalizedItemFactors() {
-    this.normalizedItemFactors ??= this.#normalize(this.#itemFactors);
-    return this.normalizedItemFactors;
+  #itemNorms() {
+    this.itemNorms ??= this.#norms(this.#itemFactors);
+    return this.itemNorms;
   }
 
-  #normalize(factors) {
-    return factors.map((row) => {
-      const norm = this.#norm(row);
-      if (norm > 0) {
-        return row.map((x) => x / norm);
-      }
-      return row;
-    });
+  #norms(factors) {
+    return factors.map((row) => this.#norm(row));
   }
 
-  #similar(id, key, map, normFactors, count) {
+  #similar(id, key, map, factors, norms, count) {
     const i = map.get(id);
     if (i === undefined) {
       return [];
     }
 
-    const factors = normFactors[i];
-    const predictions = normFactors.map((v) => this.#innerProduct(v, factors));
+    const b = factors[i];
+    const bNorm = norms[i];
+    const predictions = factors.map((a, j) => this.#innerProduct(a, b) / Math.max(norms[j] * bNorm, Number.EPSILON));
 
     let candidates = Array.from(predictions.entries());
     candidates.sort((a, b) => b[1] - a[1]);
