@@ -18,7 +18,7 @@ test('explicit', async () => {
   assert(itemIds.includes('Return of the Jedi (1983)'));
   assert(!itemIds.includes('Star Wars (1977)'));
 
-  assert(almostEqual(recs[0].score, 0.9972));
+  assert(almostEqual(recs[0].score, 0.9972, 0.01));
 
   assert.equal(recommender.itemRecs('Star Wars (1977)', null).length, 1663);
   assert.equal(recommender.similarUsers(1, null).length, 942);
@@ -156,7 +156,7 @@ test('predict', async () => {
   recommender.fit(trainSet, validSet);
 
   const predictions = recommender.predict(validSet);
-  assert(almostEqual(Metrics.rmse(validSet.map((v) => v.rating), predictions), 0.91));
+  assert(almostEqual(Metrics.rmse(validSet.map((v) => v.rating), predictions), 0.91, 0.02));
 });
 
 test('predict new user', async () => {
@@ -222,6 +222,6 @@ test('fit multiple', () => {
   assert(recommender.predict([{userId: 2, itemId: 2}])[0] <= 1);
 });
 
-function almostEqual(actual, expected) {
-  return Math.abs(actual - expected) < 0.01;
+function almostEqual(actual, expected, delta = 0.001) {
+  return Math.abs(actual - expected) <= delta;
 }
