@@ -1,5 +1,7 @@
-import { Metrics } from '../src/index';
+import assert from 'node:assert';
+import test from 'node:test';
+import { Metrics } from 'disco-rec';
 
 test('rmse', () => {
-  expect(Metrics.rmse([0, 0, 0, 1, 1], [0, 2, 4, 1, 1])).toBeCloseTo(2, 5);
+  assert.equal(Metrics.rmse([0, 0, 0, 1, 1], [0, 2, 4, 1, 1]), 2);
 });

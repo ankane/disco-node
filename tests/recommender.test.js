@@ -1,4 +1,6 @@
-import { Metrics, Recommender, loadMovieLens } from '../src/index';
+import assert from 'node:assert';
+import test from 'node:test';
+import { Metrics, Recommender, loadMovieLens } from 'disco-rec';
 
 test('explicit', async () => {
   const data = await loadMovieLens();
@@ -6,20 +8,20 @@ test('explicit', async () => {
   recommender.fit(data);
 
   const expected = data.reduce((a, v) => a + v.rating, 0) / data.length;
-  expect(recommender.globalMean()).toBeCloseTo(expected);
+  assert(almostEqual(recommender.globalMean(), expected));
 
   const recs = recommender.itemRecs('Star Wars (1977)');
-  expect(recs.length).toBe(5);
+  assert.equal(recs.length, 5);
 
   const itemIds = recs.map((r) => r.itemId);
-  expect(itemIds).toContain('Empire Strikes Back, The (1980)');
-  expect(itemIds).toContain('Return of the Jedi (1983)');
-  expect(itemIds).not.toContain('Star Wars (1977)');
+  assert(itemIds.includes('Empire Strikes Back, The (1980)'));
+  assert(itemIds.includes('Return of the Jedi (1983)'));
+  assert(!itemIds.includes('Star Wars (1977)'));
 
-  expect(recs[0].score).toBeCloseTo(0.9972, 2);
+  assert(almostEqual(recs[0].score, 0.9972));
 
-  expect(recommender.itemRecs('Star Wars (1977)', null).length).toBe(1663);
-  expect(recommender.similarUsers(1, null).length).toBe(942);
+  assert.equal(recommender.itemRecs('Star Wars (1977)', null).length, 1663);
+  assert.equal(recommender.similarUsers(1, null).length, 942);
 });
 
 test('implicit', async () => {
@@ -29,13 +31,13 @@ test('implicit', async () => {
   const recommender = new Recommender({factors: 20});
   recommender.fit(data);
 
-  expect(recommender.globalMean()).toBe(0);
+  assert.equal(recommender.globalMean(), 0);
 
   const recs = recommender.itemRecs('Star Wars (1977)', 10);
   const itemIds = recs.map((r) => r.itemId);
-  expect(itemIds).toContain('Empire Strikes Back, The (1980)');
-  expect(itemIds).toContain('Return of the Jedi (1983)');
-  expect(itemIds).not.toContain('Star Wars (1977)');
+  assert(itemIds.includes('Empire Strikes Back, The (1980)'));
+  assert(itemIds.includes('Return of the Jedi (1983)'));
+  assert(!itemIds.includes('Star Wars (1977)'));
 });
 
 test('examples', () => {
@@ -69,15 +71,15 @@ test('rated', () => {
   ];
   const recommender = new Recommender();
   recommender.fit(data);
-  expect(recommender.userRecs(1).map((r) => r.itemId).sort()).toStrictEqual(['E', 'F']);
-  expect(recommender.userRecs(2).map((r) => r.itemId).sort()).toStrictEqual(['A', 'B']);
+  assert.deepEqual(recommender.userRecs(1).map((r) => r.itemId).sort(), ['E', 'F']);
+  assert.deepEqual(recommender.userRecs(2).map((r) => r.itemId).sort(), ['A', 'B']);
 });
 
 test('item recs same score', () => {
   const data = [{userId: 1, itemId: 'A'}, {userId: 1, itemId: 'B'}, {userId: 2, itemId: 'C'}];
   const recommender = new Recommender({factors: 50});
   recommender.fit(data);
-  expect(recommender.itemRecs('A').map((r) => r.itemId)).toStrictEqual(['B', 'C']);
+  assert.deepEqual(recommender.itemRecs('A').map((r) => r.itemId), ['B', 'C']);
 });
 
 test('similar users', async () => {
@@ -85,8 +87,8 @@ test('similar users', async () => {
   const recommender = new Recommender({factors: 20});
   recommender.fit(data);
 
-  expect(recommender.similarUsers(data[0].userId)).not.toHaveLength(0);
-  expect(recommender.similarUsers('missing')).toHaveLength(0);
+  assert.notEqual(recommender.similarUsers(data[0].userId).length, 0);
+  assert.equal(recommender.similarUsers('missing').length, 0);
 });
 
 test('ids', () => {
@@ -97,8 +99,8 @@ test('ids', () => {
   ];
   const recommender = new Recommender();
   recommender.fit(data);
-  expect(recommender.userIds()).toStrictEqual([1, 2]);
-  expect(recommender.itemIds()).toStrictEqual(['A', 'B']);
+  assert.deepEqual(recommender.userIds(), [1, 2]);
+  assert.deepEqual(recommender.itemIds(), ['A', 'B']);
 });
 
 test('factors', () => {
@@ -110,11 +112,11 @@ test('factors', () => {
   const recommender = new Recommender({factors: 20});
   recommender.fit(data);
 
-  expect(recommender.userFactors(1)).toHaveLength(20);
-  expect(recommender.itemFactors('A')).toHaveLength(20);
+  assert.equal(recommender.userFactors(1).length, 20);
+  assert.equal(recommender.itemFactors('A').length, 20);
 
-  expect(recommender.userFactors(3)).toBeNull();
-  expect(recommender.itemFactors('C')).toBeNull();
+  assert.equal(recommender.userFactors(3), null);
+  assert.equal(recommender.itemFactors('C'), null);
 });
 
 test('validation set explicit', async () => {
@@ -140,7 +142,7 @@ test('user recs new user', () => {
     {userId: 1, itemId: 1, rating: 5},
     {userId: 2, itemId: 1, rating: 3}
   ]);
-  expect(recommender.userRecs(1000)).toHaveLength(0);
+  assert.equal(recommender.userRecs(1000).length, 0);
 });
 
 test('predict', async () => {
@@ -154,68 +156,72 @@ test('predict', async () => {
   recommender.fit(trainSet, validSet);
 
   const predictions = recommender.predict(validSet);
-  expect(Metrics.rmse(validSet.map((v) => v.rating), predictions)).toBeCloseTo(0.91, 1);
+  assert(almostEqual(Metrics.rmse(validSet.map((v) => v.rating), predictions), 0.91));
 });
 
 test('predict new user', async () => {
   const data = await loadMovieLens();
   const recommender = new Recommender({factors: 20});
   recommender.fit(data);
-  expect(recommender.predict([{userId: 100000, itemId: 'Star Wars (1977)'}])).toStrictEqual([recommender.globalMean()]);
+  assert.deepEqual(recommender.predict([{userId: 100000, itemId: 'Star Wars (1977)'}]), [recommender.globalMean()]);
 });
 
 test('predict new item', async () => {
   const data = await loadMovieLens();
   const recommender = new Recommender({factors: 20});
   recommender.fit(data);
-  expect(recommender.predict([{userId: 1, itemId: 'New movie'}])).toStrictEqual([recommender.globalMean()]);
+  assert.deepEqual(recommender.predict([{userId: 1, itemId: 'New movie'}]), [recommender.globalMean()]);
 });
 
 test('no training data', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([])).toThrow('No training data');
+  assert.throws(() => recommender.fit([]), {message: 'No training data'});
 });
 
 test('missing user id', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([{itemId: 1, rating: 5}])).toThrow('Missing userId');
+  assert.throws(() => recommender.fit([{itemId: 1, rating: 5}]), {message: 'Missing userId'});
 });
 
 test('missing item id', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([{userId: 1, rating: 5}])).toThrow('Missing itemId');
+  assert.throws(() => recommender.fit([{userId: 1, rating: 5}]), {message: 'Missing itemId'});
 });
 
 test('missing rating', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([{userId: 1, itemId: 1, rating: 5}, {userId: 1, itemId: 2}])).toThrow('Missing rating');
+  assert.throws(() => recommender.fit([{userId: 1, itemId: 1, rating: 5}, {userId: 1, itemId: 2}]), {message: 'Missing rating'});
 });
 
 test('missing rating validation set', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([{userId: 1, itemId: 1, rating: 5}], [{userId: 1, itemId: 2}])).toThrow('Missing rating');
+  assert.throws(() => recommender.fit([{userId: 1, itemId: 1, rating: 5}], [{userId: 1, itemId: 2}]), {message: 'Missing rating'});
 });
 
 test('invalid rating', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([{userId: 1, itemId: 1, rating: 'invalid'}])).toThrow('Rating must be numeric');
+  assert.throws(() => recommender.fit([{userId: 1, itemId: 1, rating: 'invalid'}]), {message: 'Rating must be numeric'});
 });
 
 test('invalid rating validation set', () => {
   const recommender = new Recommender();
-  expect(() => recommender.fit([{userId: 1, itemId: 1, rating: 5}], [{userId: 1, itemId: 1, rating: 'invalid'}])).toThrow('Rating must be numeric');
+  assert.throws(() => recommender.fit([{userId: 1, itemId: 1, rating: 5}], [{userId: 1, itemId: 1, rating: 'invalid'}]), {message: 'Rating must be numeric'});
 });
 
 test('not fit', () => {
   const recommender = new Recommender();
-  expect(() => recommender.userRecs(1)).toThrow('Not fit');
+  assert.throws(() => recommender.userRecs(1), {message: 'Not fit'});
 });
 
 test('fit multiple', () => {
   const recommender = new Recommender();
   recommender.fit([{userId: 1, itemId: 1, rating: 5}]);
   recommender.fit([{userId: 2, itemId: 2}]);
-  expect(recommender.userIds()).toStrictEqual([2]);
-  expect(recommender.itemIds()).toStrictEqual([2]);
-  expect(recommender.predict([{userId: 2, itemId: 2}])[0]).toBeLessThanOrEqual(1);
+  assert.deepEqual(recommender.userIds(), [2]);
+  assert.deepEqual(recommender.itemIds(), [2]);
+  assert(recommender.predict([{userId: 2, itemId: 2}])[0] <= 1);
 });
+
+function almostEqual(actual, expected) {
+  return Math.abs(actual - expected) < 0.01;
+}
