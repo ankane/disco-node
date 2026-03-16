@@ -36,7 +36,7 @@ export default class Recommender {
 
     this.userMap = new Map();
     this.itemMap = new Map();
-    this.rated = new Map();
+    this.rated = [];
 
     const input = new Matrix();
     for (let v of trainSet) {
@@ -52,10 +52,10 @@ export default class Recommender {
         this.itemMap.set(v.itemId, i);
       }
 
-      let rated = this.rated.get(u);
+      let rated = this.rated[u];
       if (!rated) {
         rated = new Set();
-        this.rated.set(u, rated);
+        this.rated[u] = rated;
       }
       rated.add(i);
 
@@ -155,7 +155,7 @@ export default class Recommender {
       return [];
     }
 
-    const rated = this.rated.get(u);
+    const rated = this.rated[u];
 
     const factors = this.#userFactors[u];
     const predictions = this.#itemFactors.map((v) => this.#innerProduct(v, factors));
