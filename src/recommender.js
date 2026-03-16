@@ -44,6 +44,7 @@ export default class Recommender {
       if (u === undefined) {
         u = this.userMap.size;
         this.userMap.set(v.userId, u);
+        this.rated.push(new Set());
       }
 
       let i = this.itemMap.get(v.itemId);
@@ -52,12 +53,7 @@ export default class Recommender {
         this.itemMap.set(v.itemId, i);
       }
 
-      let rated = this.rated[u];
-      if (!rated) {
-        rated = new Set();
-        this.rated[u] = rated;
-      }
-      rated.add(i);
+      this.rated[u].add(i);
 
       input.push(u, i, this.implicit ? 1 : v.rating);
     }
