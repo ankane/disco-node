@@ -1,3 +1,7 @@
+## 0.3.0 (unreleased)
+
+- Dropped support for Node < 22
+
 ## 0.2.0 (2024-07-13)
 
 - Reduced memory for `itemRecs` and `similarUsers`
