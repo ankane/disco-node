@@ -85,15 +85,13 @@ export default class Recommender {
 
     let evalSet = null;
     if (validationSet) {
+      // TODO fix implicit
+      const unseenU = this.implicit ? 0 : this.userMap.size;
+      const unseenI = this.implicit ? 0 : this.itemMap.size;
       evalSet = new Matrix();
       for (let v of validationSet) {
-        let u = this.userMap.get(v.userId);
-        let i = this.itemMap.get(v.itemId);
-
-        // set to non-existent item
-        u ??= -1;
-        i ??= -1;
-
+        let u = this.userMap.get(v.userId) ?? unseenU;
+        let i = this.itemMap.get(v.itemId) ?? unseenI;
         evalSet.push(u, i, this.implicit ? 1 : v.rating);
       }
     }
