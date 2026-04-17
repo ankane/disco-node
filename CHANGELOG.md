@@ -1,5 +1,6 @@
 ## 0.3.0 (unreleased)
 
+- Fixed handling of new users and items in validation set
 - Dropped support for Node < 22
 
 ## 0.2.0 (2024-07-13)
