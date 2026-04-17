@@ -85,13 +85,24 @@ export default class Recommender {
 
     let evalSet = null;
     if (validationSet) {
-      // TODO fix implicit
-      const unseenU = this.implicit ? 0 : this.userMap.size;
-      const unseenI = this.implicit ? 0 : this.itemMap.size;
       evalSet = new Matrix();
       for (let v of validationSet) {
-        let u = this.userMap.get(v.userId) ?? unseenU;
-        let i = this.itemMap.get(v.itemId) ?? unseenI;
+        let u = this.userMap.get(v.userId);
+        let i = this.itemMap.get(v.itemId);
+
+        if (this.implicit) {
+          if (u === undefined) {
+            throw new Error('Validation set cannot have new users for implicit feedback');
+          }
+
+          if (i === undefined) {
+            throw new Error('Validation set cannot have new items for implicit feedback');
+          }
+        } else {
+          u ??= this.userMap.size;
+          i ??= this.itemMap.size;
+        }
+
         evalSet.push(u, i, this.implicit ? 1 : v.rating);
       }
     }

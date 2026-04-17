@@ -131,9 +131,28 @@ test('validation set implicit', async () => {
   const data = await loadMovieLens();
   data.forEach((v) => delete v.rating);
   const trainSet = data.slice(0, 80000);
-  const validationSet = data.slice(80000);
+  const itemIds = trainSet.map((v) => v.itemId);
+  const validationSet = data.slice(80000).filter((v) => itemIds.includes(v.itemId));
   const recommender = new Recommender({factors: 20, verbose: false});
   recommender.fit(trainSet, validationSet);
+});
+
+test('validation set implicit new user', async () => {
+  const data = [
+    {userId: 1, itemId: 1},
+    {userId: 2, itemId: 1}
+  ];
+  const recommender = new Recommender();
+  assert.throws(() => recommender.fit(data, [{userId: 3, itemId: 1}]), {message: 'Validation set cannot have new users for implicit feedback'});
+});
+
+test('validation set implicit new item', async () => {
+  const data = [
+    {userId: 1, itemId: 1},
+    {userId: 2, itemId: 1}
+  ];
+  const recommender = new Recommender();
+  assert.throws(() => recommender.fit(data, [{userId: 1, itemId: 2}]), {message: 'Validation set cannot have new items for implicit feedback'});
 });
 
 test('user recs new user', () => {
