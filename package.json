@@ -4,19 +4,11 @@
   "description": "Recommendations for Node.js using collaborative filtering",
   "homepage": "https://github.com/ankane/disco-node",
   "license": "MIT",
+  "author": "Andrew Kane",
   "type": "module",
+  "files": ["src"],
   "main": "./src/index.js",
   "exports": "./src/index.js",
-  "authors": [
-    "ankane"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ankane/disco-node"
-  },
-  "files": [
-    "src"
-  ],
   "engines": {
     "node": ">=22"
   },
