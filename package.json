@@ -6,7 +6,9 @@
   "license": "MIT",
   "author": "Andrew Kane",
   "type": "module",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "main": "./src/index.js",
   "exports": "./src/index.js",
   "engines": {
